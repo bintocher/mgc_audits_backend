@@ -70,6 +70,13 @@ from app.schemas.notification import (
     NotificationStatsResponse,
     NotificationQueueStatsResponse,
 )
+from app.schemas.export_task import (
+    ExportTaskBase,
+    ExportTaskCreate,
+    ExportTaskUpdate,
+    ExportTaskResponse,
+    ExportTaskStatusResponse,
+)
 
 __all__ = [
     "QualificationStandardBase",
@@ -126,5 +133,10 @@ __all__ = [
     "NotificationQueueResponse",
     "NotificationStatsResponse",
     "NotificationQueueStatsResponse",
+    "ExportTaskBase",
+    "ExportTaskCreate",
+    "ExportTaskUpdate",
+    "ExportTaskResponse",
+    "ExportTaskStatusResponse",
 ]
 

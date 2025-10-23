@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from typing import List
+from uuid import UUID
 from app.core.celery_worker import celery_app
 from app.core.database import async_session_maker
 from app.models.auditor_qualification import AuditorQualification
@@ -7,9 +8,16 @@ from app.models.status import Status
 from app.models.notification import Notification
 from app.models.notification_queue import NotificationQueue
 from app.models.user import User
+from app.models.export_task import ExportTask, ExportTaskStatus
 from app.crud import notification as crud_notification
+from app.crud import export_task as crud_export_task
+from app.crud import audit as crud_audit
 from app.services.notification_service import send_notification_email, send_notification_telegram
+from app.services.export import export_audit_to_zip
+from app.services.s3 import s3_service
 from sqlalchemy import select
+import os
+from datetime import datetime, timezone
 
 
 @celery_app.task
@@ -212,4 +220,77 @@ async def retry_failed_notifications():
                     retried_count += 1
         
         return {"retried": retried_count}
+
+
+@celery_app.task(bind=True)
+async def export_audit_task(self, export_task_id: str):
+    """
+    Асинхронная задача для экспорта аудита.
+    
+    Args:
+        self: Экземпляр задачи Celery
+        export_task_id: ID задачи экспорта
+    
+    Returns:
+        dict: Результат экспорта
+    """
+    async with async_session_maker() as db:
+        export_task_uuid = UUID(export_task_id)
+        db_export_task = await crud_export_task.get_export_task(db, export_task_uuid)
+        
+        if not db_export_task:
+            return {"error": "Export task not found"}
+        
+        try:
+            db_export_task.status = ExportTaskStatus.PROCESSING
+            db_export_task.celery_task_id = self.request.id
+            await db.commit()
+            
+            audit_id = db_export_task.audit_id
+            
+            export_data = await crud_audit.collect_audit_export_data(db=db, audit_id=audit_id)
+            
+            if not export_data:
+                db_export_task.status = ExportTaskStatus.FAILED
+                db_export_task.error_message = "Audit not found"
+                db_export_task.completed_at = datetime.now(timezone.utc)
+                await db.commit()
+                return {"error": "Audit not found"}
+            
+            zip_file = export_audit_to_zip(
+                audit_data=export_data["audit"],
+                findings_data=export_data["findings"],
+                attachments_data=export_data["attachments"],
+                history_data=export_data["history"]
+            )
+            
+            audit_number = export_data["audit"].get("audit_number", "unknown")
+            timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+            filename = f"audit_{audit_number}_{timestamp}.zip"
+            
+            s3_key = f"exports/{filename}"
+            
+            await s3_service.upload_file(
+                file_obj=zip_file,
+                s3_key=s3_key,
+                content_type="application/zip"
+            )
+            
+            db_export_task.status = ExportTaskStatus.COMPLETED
+            db_export_task.file_path = s3_key
+            db_export_task.completed_at = datetime.now(timezone.utc)
+            await db.commit()
+            
+            return {
+                "status": "completed",
+                "file_path": s3_key,
+                "filename": filename
+            }
+            
+        except Exception as e:
+            db_export_task.status = ExportTaskStatus.FAILED
+            db_export_task.error_message = str(e)
+            db_export_task.completed_at = datetime.now(timezone.utc)
+            await db.commit()
+            return {"error": str(e)}
 

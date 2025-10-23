@@ -9,6 +9,7 @@ from app.models.user import User
 from app.crud import audit as crud_audit
 from app.crud import audit_calendar as crud_calendar
 from app.crud import audit_schedule_week as crud_schedule_week
+from app.crud import export_task as crud_export_task
 from app.schemas.audit import (
     AuditCreate,
     AuditUpdate,
@@ -21,7 +22,10 @@ from app.schemas.audit import (
 )
 from app.schemas.audit_schedule_week import AuditScheduleWeekResponse
 from app.schemas.change_history import ChangeHistoryResponse
+from app.schemas.export_task import ExportTaskCreate, ExportTaskResponse, ExportTaskStatusResponse
 from app.services.export import export_audit_to_zip
+from app.services.tasks import export_audit_task
+from app.models.export_task import ExportTaskStatus
 
 
 router = APIRouter(prefix="/audits", tags=["audits"])
@@ -531,39 +535,169 @@ async def get_audit_history(
     return history
 
 
-@router.post("/{audit_id}/export")
-async def export_audit(
+@router.post("/{audit_id}/export", response_model=ExportTaskResponse, status_code=status.HTTP_202_ACCEPTED)
+async def create_export_task(
     audit_id: UUID,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     """
-    Экспортировать аудит со всеми связанными данными в ZIP архив.
+    Создать задачу асинхронного экспорта аудита.
+    
+    Args:
+        audit_id: ID аудита для экспорта
+        current_user: Текущий пользователь
+        db: Сессия базы данных
     
     Returns:
-        ZIP архив с данными аудита
-    """
-    export_data = await crud_audit.collect_audit_export_data(db=db, audit_id=audit_id)
+        Задача экспорта со статусом PENDING
     
-    if not export_data:
+    Raises:
+        HTTPException: Если аудит не найден
+    """
+    audit = await crud_audit.get_audit(db, audit_id)
+    if not audit:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Audit not found"
         )
     
-    zip_file = export_audit_to_zip(
-        audit_data=export_data["audit"],
-        findings_data=export_data["findings"],
-        attachments_data=export_data["attachments"],
-        history_data=export_data["history"]
+    export_task_create = ExportTaskCreate(audit_id=audit_id)
+    export_task = await crud_export_task.create_export_task(
+        db=db,
+        export_task=export_task_create,
+        user_id=current_user.id
     )
     
-    audit_number = export_data["audit"].get("audit_number", "unknown")
+    result = export_audit_task.delay(str(export_task.id))
     
-    return Response(
-        content=zip_file.read(),
-        media_type="application/zip",
-        headers={
-            "Content-Disposition": f"attachment; filename=audit_{audit_number}_{date.today().isoformat()}.zip"
-        }
+    return export_task
+
+
+@router.get("/{audit_id}/export/{task_id}", response_model=ExportTaskStatusResponse)
+async def get_export_task_status(
+    audit_id: UUID,
+    task_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session)
+):
+    """
+    Получить статус задачи экспорта аудита.
+    
+    Args:
+        audit_id: ID аудита
+        task_id: ID задачи экспорта
+        current_user: Текущий пользователь
+        db: Сессия базы данных
+    
+    Returns:
+        Статус задачи экспорта
+    
+    Raises:
+        HTTPException: Если задача не найдена
+    """
+    export_task = await crud_export_task.get_export_task(db, task_id)
+    
+    if not export_task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Export task not found"
+        )
+    
+    if export_task.audit_id != audit_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Task does not belong to this audit"
+        )
+    
+    if export_task.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have access to this export task"
+        )
+    
+    return ExportTaskStatusResponse(
+        task_id=export_task.id,
+        celery_task_id=export_task.celery_task_id,
+        status=export_task.status,
+        file_path=export_task.file_path,
+        error_message=export_task.error_message,
+        completed_at=export_task.completed_at
     )
+
+
+@router.get("/{audit_id}/export/{task_id}/download")
+async def download_exported_audit(
+    audit_id: UUID,
+    task_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session)
+):
+    """
+    Скачать экспортированный аудит.
+    
+    Args:
+        audit_id: ID аудита
+        task_id: ID задачи экспорта
+        current_user: Текущий пользователь
+        db: Сессия базы данных
+    
+    Returns:
+        ZIP архив с данными аудита
+    
+    Raises:
+        HTTPException: Если задача не найдена или не завершена
+    """
+    export_task = await crud_export_task.get_export_task(db, task_id)
+    
+    if not export_task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Export task not found"
+        )
+    
+    if export_task.audit_id != audit_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Task does not belong to this audit"
+        )
+    
+    if export_task.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have access to this export task"
+        )
+    
+    if export_task.status != ExportTaskStatus.COMPLETED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Export task is not completed. Current status: {export_task.status}"
+        )
+    
+    if not export_task.file_path:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="File path not found"
+        )
+    
+    from app.services.s3 import s3_service
+    
+    try:
+        file_content = await s3_service.download_file(export_task.file_path)
+        
+        from datetime import datetime
+        filename = export_task.file_path.split("/")[-1]
+        
+        return Response(
+            content=file_content,
+            media_type="application/zip",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}"
+            }
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to download file: {str(e)}"
+        )
 

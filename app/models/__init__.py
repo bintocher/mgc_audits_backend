@@ -27,6 +27,7 @@ from app.models.email_account import EmailAccount
 from app.models.ldap_connection import LdapConnection
 from app.models.notification import Notification
 from app.models.notification_queue import NotificationQueue
+from app.models.export_task import ExportTask
 
 __all__ = [
     "Enterprise",
@@ -61,5 +62,6 @@ __all__ = [
     "LdapConnection",
     "Notification",
     "NotificationQueue",
+    "ExportTask",
 ]
 
