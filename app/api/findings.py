@@ -19,6 +19,7 @@ from app.schemas.finding import (
     FindingCommentUpdate,
     FindingCommentResponse
 )
+from app.schemas.change_history import ChangeHistoryResponse
 
 
 router = APIRouter(prefix="/findings", tags=["findings"])
@@ -128,6 +129,7 @@ async def get_finding(
 async def update_finding(
     finding_id: UUID,
     finding_update: FindingUpdate,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     """
@@ -136,6 +138,7 @@ async def update_finding(
     Args:
         finding_id: UUID несоответствия
         finding_update: Данные для обновления
+        current_user: Текущий пользователь
         db: Сессия базы данных
     
     Returns:
@@ -144,12 +147,48 @@ async def update_finding(
     Raises:
         HTTPException: Если несоответствие не найдено
     """
+    # Получаем старые данные
+    old_finding = await crud_finding.get_finding(db, finding_id)
+    if not old_finding:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Finding not found"
+        )
+    
+    # Сохраняем старые данные в виде словаря
+    old_data = {
+        field: getattr(old_finding, field, None)
+        for field in old_finding.__table__.columns.keys()
+    }
+    
+    # Обновляем несоответствие
     updated_finding = await crud_finding.update_finding(db, finding_id, finding_update)
     if not updated_finding:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Finding not found"
         )
+    
+    # Получаем новые данные
+    new_data = {
+        field: getattr(updated_finding, field, None)
+        for field in updated_finding.__table__.columns.keys()
+    }
+    
+    # Логируем изменения
+    from app.services.change_history import log_entity_changes
+    await log_entity_changes(
+        db=db,
+        entity_type='finding',
+        entity_id=finding_id,
+        user_id=current_user.id,
+        old_data=old_data,
+        new_data=new_data
+    )
+    
+    await db.commit()
+    await db.refresh(updated_finding)
+    
     return updated_finding
 
 
@@ -324,4 +363,50 @@ async def delete_finding_comment(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Comment not found"
         )
+
+
+@router.get("/{finding_id}/history", response_model=List[ChangeHistoryResponse])
+async def get_finding_history(
+    finding_id: UUID,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Получить историю изменений несоответствия.
+    
+    Args:
+        finding_id: UUID несоответствия
+        skip: Количество записей для пропуска
+        limit: Максимальное количество записей для возврата (1-100)
+        db: Сессия базы данных
+        current_user: Текущий авторизованный пользователь
+    
+    Returns:
+        Список записей истории изменений
+    
+    Raises:
+        HTTPException: Если несоответствие не найдено
+    """
+    from app.crud import change_history as crud_change_history
+    
+    # Проверяем существование несоответствия
+    finding = await crud_finding.get_finding(db, finding_id)
+    if not finding:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Finding not found"
+        )
+    
+    # Получаем историю изменений
+    history = await crud_change_history.get_change_history_list(
+        db=db,
+        skip=skip,
+        limit=limit,
+        entity_type='finding',
+        entity_id=finding_id
+    )
+    
+    return history
 

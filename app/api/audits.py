@@ -20,6 +20,7 @@ from app.schemas.audit import (
     ComponentScheduleItem
 )
 from app.schemas.audit_schedule_week import AuditScheduleWeekResponse
+from app.schemas.change_history import ChangeHistoryResponse
 
 
 router = APIRouter(prefix="/audits", tags=["audits"])
@@ -132,6 +133,7 @@ async def get_audit(
 async def update_audit(
     audit_id: UUID,
     audit_update: AuditUpdate,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     """
@@ -140,6 +142,7 @@ async def update_audit(
     Args:
         audit_id: UUID аудита
         audit_update: Данные для обновления
+        current_user: Текущий пользователь
         db: Сессия базы данных
     
     Returns:
@@ -148,12 +151,48 @@ async def update_audit(
     Raises:
         HTTPException: Если аудит не найден
     """
+    # Получаем старые данные
+    old_audit = await crud_audit.get_audit(db, audit_id)
+    if not old_audit:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Audit not found"
+        )
+    
+    # Сохраняем старые данные в виде словаря
+    old_data = {
+        field: getattr(old_audit, field, None)
+        for field in old_audit.__table__.columns.keys()
+    }
+    
+    # Обновляем аудит
     updated_audit = await crud_audit.update_audit(db, audit_id, audit_update)
     if not updated_audit:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Audit not found"
         )
+    
+    # Получаем новые данные
+    new_data = {
+        field: getattr(updated_audit, field, None)
+        for field in updated_audit.__table__.columns.keys()
+    }
+    
+    # Логируем изменения
+    from app.services.change_history import log_entity_changes
+    await log_entity_changes(
+        db=db,
+        entity_type='audit',
+        entity_id=audit_id,
+        user_id=current_user.id,
+        old_data=old_data,
+        new_data=new_data
+    )
+    
+    await db.commit()
+    await db.refresh(updated_audit)
+    
     return updated_audit
 
 
@@ -443,4 +482,50 @@ async def get_reschedule_history(
         ))
     
     return result
+
+
+@router.get("/{audit_id}/history", response_model=List[ChangeHistoryResponse])
+async def get_audit_history(
+    audit_id: UUID,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Получить историю изменений аудита.
+    
+    Args:
+        audit_id: UUID аудита
+        skip: Количество записей для пропуска
+        limit: Максимальное количество записей для возврата (1-100)
+        db: Сессия базы данных
+        current_user: Текущий авторизованный пользователь
+    
+    Returns:
+        Список записей истории изменений
+    
+    Raises:
+        HTTPException: Если аудит не найден
+    """
+    from app.crud import change_history as crud_change_history
+    
+    # Проверяем существование аудита
+    audit = await crud_audit.get_audit(db, audit_id)
+    if not audit:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Audit not found"
+        )
+    
+    # Получаем историю изменений
+    history = await crud_change_history.get_change_history_list(
+        db=db,
+        skip=skip,
+        limit=limit,
+        entity_type='audit',
+        entity_id=audit_id
+    )
+    
+    return history
 

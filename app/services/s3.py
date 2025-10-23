@@ -120,6 +120,36 @@ def upload_file_to_s3(storage: S3Storage, file_path: str, s3_key: str) -> bool:
         return False
 
 
+def upload_fileobj_to_s3(storage: S3Storage, file_obj, s3_key: str, content_type: Optional[str] = None) -> bool:
+    """
+    Загружает файл из файлового объекта в S3 бакет.
+    
+    Args:
+        storage: S3 хранилище
+        file_obj: Файловый объект (BytesIO, FileStorage и т.д.)
+        s3_key: S3 ключ объекта
+        content_type: MIME тип файла (опционально)
+    
+    Returns:
+        True если загрузка успешна, False в противном случае
+    """
+    try:
+        client = get_s3_client(storage)
+        
+        full_key = f"{storage.prefix}{s3_key}" if storage.prefix else s3_key
+        
+        extra_args = {}
+        if content_type:
+            extra_args['ContentType'] = content_type
+        
+        client.upload_fileobj(file_obj, storage.bucket_name, full_key, ExtraArgs=extra_args)
+        
+        return True
+    except ClientError as e:
+        logger.error(f"Failed to upload file to S3: {e}")
+        return False
+
+
 def generate_presigned_url(storage: S3Storage, s3_key: str, expiration: int = 3600) -> Optional[str]:
     try:
         client = get_s3_client(storage)
