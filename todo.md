@@ -2,31 +2,31 @@
 
 ## Подготовка проекта
 
-1. Создать структуру директорий backend приложения
-2. Создать файл requirements.txt с базовыми зависимостями
-3. Создать файл .env.example с переменными окружения
-4. Создать файл pyproject.toml для настройки проекта
-5. Настроить gitignore для Python проекта
-6. Создать docker-compose.yml с сервисами PostgreSQL, Redis и backend
-7. Создать Dockerfile для backend приложения
-8. Создать Makefile с командами для управления проектом
-9. Создать директорию app/ с базовой структурой модулей
-10. Создать main.py с базовой конфигурацией FastAPI и автоматической генерацией Swagger
-11. Создать core/config.py для настроек приложения
-12. Создать core/security.py для функций безопасности
-13. Создать database.py для подключения к PostgreSQL через SQLAlchemy
-14. Создать core/base.py с AbstractBaseModel и SoftDeleteMixin
-15. Настроить Alembic для миграций базы данных
-16. Создать init_db.py для инициализации базы данных
+1. [x] Создать структуру директорий backend приложения
+2. [x] Создать файл requirements.txt с базовыми зависимостями
+3. [x] Создать файл .env.example с переменными окружения
+4. [x] Создать файл pyproject.toml для настройки проекта
+5. [x] Настроить gitignore для Python проекта
+6. [x] Создать docker-compose.yml с сервисами PostgreSQL, Redis и backend
+7. [x] Создать Dockerfile для backend приложения
+8. [x] Создать Makefile с командами для управления проектом
+9. [x] Создать директорию app/ с базовой структурой модулей
+10. [x] Создать main.py с базовой конфигурацией FastAPI и автоматической генерацией Swagger
+11. [x] Создать core/config.py для настроек приложения
+12. [x] Создать core/security.py для функций безопасности
+13. [x] Создать database.py для подключения к PostgreSQL через SQLAlchemy
+14. [x] Создать core/base.py с AbstractBaseModel и SoftDeleteMixin
+15. [x] Настроить Alembic для миграций базы данных
+16. [x] Создать init_db.py для инициализации базы данных
 
 ## Базовые модели и пользователи
 
-17. Создать модель Enterprise в models/enterprise.py
-18. Создать модель Division в models/division.py
-19. Создать модель Location в models/location.py
-20. Создать модель User в models/user.py
-21. Создать модели Role и Permission в models/role.py
-22. Создать модель UserRole в models/user_role.py
+17. [x] Создать модель Enterprise в models/enterprise.py
+18. [x] Создать модель Division в models/division.py
+19. [x] Создать модель Location в models/location.py
+20. [x] Создать модель User в models/user.py
+21. [x] Создать модели Role и Permission в models/role.py
+22. [x] Создать модель UserRole в models/user_role.py
 23. Создать схемы Pydantic для User в schemas/user.py
 24. Создать схемы Pydantic для Enterprise в schemas/enterprise.py
 25. Создать CRUD операции для User в crud/user.py
