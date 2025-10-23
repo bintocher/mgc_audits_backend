@@ -8,6 +8,7 @@ from app.models.registration_invite import RegistrationInvite
 from app.models.api_token import APIToken
 from app.models.status import Status
 from app.models.status_transition import StatusTransition
+from app.models.dictionary import DictionaryType, Dictionary
 
 __all__ = [
     "Enterprise",
@@ -21,5 +22,7 @@ __all__ = [
     "APIToken",
     "Status",
     "StatusTransition",
+    "DictionaryType",
+    "Dictionary",
 ]
 

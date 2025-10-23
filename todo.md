@@ -77,17 +77,17 @@
 60. [x] Создать CRUD для StatusTransition
 61. [x] Создать API роуты для workflow/statuses
 62. [x] Создать API роуты для workflow/transitions
-63. Реализовать валидацию переходов статусов
-64. Реализовать проверку required_fields при смене статуса
-65. Реализовать проверку required_roles при смене статуса
+63. [x] Реализовать валидацию переходов статусов
+64. [x] Реализовать проверку required_fields при смене статуса
+65. [x] Реализовать проверку required_roles при смене статуса
 
 ## Справочники
 
-66. Создать модель DictionaryType в models/dictionary.py
-67. Создать модель Dictionary в models/dictionary.py
-68. Создать модели для конкретных справочников (Process, Norm, Product, Project, Client, Shift, RiskLevel, AuditCategory)
-69. Создать схемы для Dictionary
-70. Создать CRUD для Dictionary
+66. [x] Создать модель DictionaryType в models/dictionary.py
+67. [x] Создать модель Dictionary в models/dictionary.py
+68. [x] Создать модели для конкретных справочников (Process, Norm, Product, Project, Client, Shift, RiskLevel, AuditCategory)
+69. [x] Создать схемы для Dictionary
+70. [x] Создать CRUD для Dictionary
 71. Создать API роуты для dictionaries
 72. Создать API роуты для dictionary_types
 73. Реализовать фильтрацию справочников по enterprise_id

@@ -15,7 +15,13 @@ from app.schemas.status import (
     StatusResponse,
     StatusTransitionCreate,
     StatusTransitionUpdate,
-    StatusTransitionResponse
+    StatusTransitionResponse,
+    StatusTransitionValidateRequest,
+    StatusTransitionValidateResponse
+)
+from app.services.workflow import (
+    validate_status_transition,
+    get_allowed_transitions
 )
 
 router = APIRouter(prefix="/workflow", tags=["workflow"])
@@ -188,4 +194,55 @@ async def delete_transition(
     
     await db.commit()
     return {"message": "Transition deleted successfully"}
+
+
+@router.post("/transitions/validate", response_model=StatusTransitionValidateResponse)
+async def validate_transition(
+    validate_data: StatusTransitionValidateRequest,
+    current_user: User = Depends(require_staff),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Валидация перехода между статусами.
+    Проверяет разрешенность перехода, наличие необходимых ролей и заполнение обязательных полей.
+    """
+    try:
+        transition = await validate_status_transition(
+            db=db,
+            from_status_id=validate_data.from_status_id,
+            to_status_id=validate_data.to_status_id,
+            user=current_user,
+            entity_data=validate_data.entity_data,
+            comment=validate_data.comment
+        )
+        
+        return StatusTransitionValidateResponse(
+            is_valid=True,
+            message="Transition is valid",
+            transition=StatusTransitionResponse.model_validate(transition)
+        )
+    except HTTPException as e:
+        return StatusTransitionValidateResponse(
+            is_valid=False,
+            message=e.detail,
+            transition=None
+        )
+
+
+@router.get("/transitions/allowed", response_model=List[StatusTransitionResponse])
+async def get_allowed_transitions_for_user(
+    from_status_id: UUID = Query(..., description="ID текущего статуса"),
+    current_user: User = Depends(require_staff),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Получить список разрешенных переходов из текущего статуса для текущего пользователя.
+    """
+    transitions = await get_allowed_transitions(
+        db=db,
+        from_status_id=from_status_id,
+        user=current_user
+    )
+    
+    return [StatusTransitionResponse.model_validate(t) for t in transitions]
 

@@ -67,3 +67,18 @@ class StatusTransitionResponse(StatusTransitionBase):
     class Config:
         from_attributes = True
 
+
+class StatusTransitionValidateRequest(BaseModel):
+    from_status_id: UUID
+    to_status_id: UUID
+    entity_data: Optional[Dict[str, Any]] = None
+    comment: Optional[str] = None
+
+
+class StatusTransitionValidateResponse(BaseModel):
+    is_valid: bool
+    message: str
+    transition: Optional[StatusTransitionResponse] = None
+    missing_fields: Optional[List[str]] = None
+    missing_roles: Optional[List[str]] = None
+
