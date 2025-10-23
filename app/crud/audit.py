@@ -198,3 +198,29 @@ async def reschedule_audit(
     await db.refresh(db_audit)
     return db_audit
 
+
+async def get_reschedule_history(
+    db: AsyncSession,
+    audit_id: UUID
+) -> List[dict]:
+    """
+    Получить историю переносов аудита.
+    История содержится в полях rescheduled_date, postponed_reason, rescheduled_by_id, rescheduled_at.
+    Возвращает список всех переносов.
+    """
+    db_audit = await get_audit(db, audit_id)
+    if not db_audit:
+        return []
+    
+    if not db_audit.rescheduled_date:
+        return []
+    
+    history = {
+        "rescheduled_date": db_audit.rescheduled_date,
+        "postponed_reason": db_audit.postponed_reason,
+        "rescheduled_by": db_audit.rescheduled_by,
+        "rescheduled_at": db_audit.rescheduled_at
+    }
+    
+    return [history]
+

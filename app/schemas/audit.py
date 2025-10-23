@@ -163,3 +163,68 @@ class AuditResponse(AuditBase):
     class Config:
         from_attributes = True
 
+
+class WeekInfo(BaseModel):
+    week_number: int
+    year: int
+    start_date: date
+    end_date: date
+
+
+class PeriodInfo(BaseModel):
+    date_from: date
+    date_to: date
+    weeks: List[WeekInfo]
+
+
+class WeekSchedule(BaseModel):
+    week_number: int
+    year: int
+    manual_data: Optional[str] = None
+    calculated_result: Optional[str] = None
+    calculated_status: Optional[str] = None
+    color: Optional[str] = None
+
+
+class AuditInfo(BaseModel):
+    id: UUID
+    title: str
+    audit_number: str
+    category: str
+    auditor: SimpleUser
+    locations: List[SimpleLocation]
+    clients: List[str]
+    risk_level: Optional[str] = None
+    milestone_codes: Optional[str] = None
+    status: dict
+    weeks: List[WeekSchedule]
+
+
+class AuditScheduleResponse(BaseModel):
+    period: PeriodInfo
+    audits: List[AuditInfo]
+
+
+class ScheduleWeekUpdate(BaseModel):
+    manual_data: Optional[str] = Field(None, max_length=100)
+    color_override: Optional[str] = Field(None, max_length=7)
+
+
+class RescheduleHistoryItem(BaseModel):
+    rescheduled_date: date
+    postponed_reason: str
+    rescheduled_by: SimpleUser
+    rescheduled_at: datetime
+
+
+class ComponentScheduleItem(BaseModel):
+    component_type: str
+    sap_id: Optional[str] = None
+    part_number: Optional[str] = None
+    component_name: str
+    audit_date_from: date
+    audit_date_to: date
+    estimated_hours: Optional[Decimal] = None
+    actual_hours: Optional[Decimal] = None
+    status: dict
+

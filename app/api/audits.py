@@ -7,12 +7,19 @@ from app.core.database import get_session
 from app.core.dependencies import get_current_user
 from app.models.user import User
 from app.crud import audit as crud_audit
+from app.crud import audit_calendar as crud_calendar
+from app.crud import audit_schedule_week as crud_schedule_week
 from app.schemas.audit import (
     AuditCreate,
     AuditUpdate,
     AuditResponse,
-    AuditRescheduleRequest
+    AuditRescheduleRequest,
+    AuditScheduleResponse,
+    ScheduleWeekUpdate,
+    RescheduleHistoryItem,
+    ComponentScheduleItem
 )
+from app.schemas.audit_schedule_week import AuditScheduleWeekResponse
 
 
 router = APIRouter(prefix="/audits", tags=["audits"])
@@ -209,4 +216,231 @@ async def reschedule_audit(
             detail="Audit not found"
         )
     return updated_audit
+
+
+@router.get("/calendar/schedule", response_model=AuditScheduleResponse)
+async def get_audit_schedule(
+    date_from: date = Query(..., description="Начальная дата периода"),
+    date_to: date = Query(..., description="Конечная дата периода"),
+    audit_category: Optional[str] = Query(None, description="Тип графика ('product', 'process_system', 'lra', 'external')"),
+    enterprise_id: Optional[UUID] = Query(None, description="Фильтр по предприятию"),
+    division_id: Optional[UUID] = Query(None, description="Фильтр по дивизиону"),
+    auditor_id: Optional[UUID] = Query(None, description="Фильтр по аудитору"),
+    status_id: Optional[UUID] = Query(None, description="Фильтр по статусу"),
+    db: AsyncSession = Depends(get_session)
+):
+    """
+    Получить график аудитов за произвольный период, сгруппированный по неделям.
+    
+    Args:
+        date_from: Начальная дата периода
+        date_to: Конечная дата периода
+        audit_category: Тип графика
+        enterprise_id: Фильтр по предприятию
+        division_id: Фильтр по дивизиону
+        auditor_id: Фильтр по аудитору
+        status_id: Фильтр по статусу
+        db: Сессия базы данных
+    
+    Returns:
+        График аудитов с разбивкой по неделям
+    """
+    audits = await crud_calendar.get_audit_schedule(
+        db=db,
+        date_from=date_from,
+        date_to=date_to,
+        audit_category=audit_category,
+        enterprise_id=enterprise_id,
+        auditor_id=auditor_id,
+        status_id=status_id
+    )
+    
+    weeks = crud_calendar.get_weeks_in_range(date_from, date_to)
+    
+    from app.schemas.audit import (
+        WeekInfo, PeriodInfo, WeekSchedule, AuditInfo, SimpleUser, SimpleLocation
+    )
+    
+    period_info = PeriodInfo(
+        date_from=date_from,
+        date_to=date_to,
+        weeks=[WeekInfo(**week) for week in weeks]
+    )
+    
+    audit_list = []
+    for audit in audits:
+        weeks_schedule = []
+        for week in audit.schedule_weeks:
+            color = week.color_override
+            if not color:
+                color = crud_calendar.calculate_color(audit.audit_result, audit.status.code if audit.status else None)
+            
+            weeks_schedule.append(WeekSchedule(
+                week_number=week.week_number,
+                year=week.year,
+                manual_data=week.manual_data,
+                calculated_result=week.calculated_result,
+                calculated_status=week.calculated_status,
+                color=color
+            ))
+        
+        clients = [client.name for client in audit.clients]
+        
+        audit_info = AuditInfo(
+            id=audit.id,
+            title=audit.title,
+            audit_number=audit.audit_number,
+            category=audit.audit_category,
+            auditor=SimpleUser(
+                id=audit.auditor.id,
+                first_name_ru=audit.auditor.first_name_ru,
+                last_name_ru=audit.auditor.last_name_ru,
+                patronymic_ru=audit.auditor.patronymic_ru
+            ),
+            locations=[SimpleLocation(
+                id=loc.id,
+                name=loc.name,
+                short_name=loc.short_name
+            ) for loc in audit.locations],
+            clients=clients,
+            risk_level=audit.risk_level.code if audit.risk_level else None,
+            milestone_codes=audit.milestone_codes,
+            status={
+                "id": str(audit.status.id),
+                "name": audit.status.name,
+                "code": audit.status.code
+            },
+            weeks=weeks_schedule
+        )
+        audit_list.append(audit_info)
+    
+    return AuditScheduleResponse(period=period_info, audits=audit_list)
+
+
+@router.patch("/{audit_id}/schedule/{week_number}/{year}", response_model=AuditScheduleWeekResponse)
+async def update_schedule_week(
+    audit_id: UUID,
+    week_number: int,
+    year: int,
+    update_data: ScheduleWeekUpdate,
+    db: AsyncSession = Depends(get_session)
+):
+    """
+    Редактировать ячейку графика (ручной ввод).
+    
+    Args:
+        audit_id: UUID аудита
+        week_number: Номер недели
+        year: Год
+        update_data: Данные для обновления
+        db: Сессия базы данных
+    
+    Returns:
+        Обновленная ячейка графика
+    
+    Raises:
+        HTTPException: Если ячейка не найдена
+    """
+    from app.schemas.audit_schedule_week import AuditScheduleWeekUpdate
+    
+    update_schema = AuditScheduleWeekUpdate(**update_data.model_dump())
+    
+    updated_week = await crud_schedule_week.update_audit_schedule_week_by_period(
+        db=db,
+        audit_id=audit_id,
+        week_number=week_number,
+        year=year,
+        schedule_week_update=update_schema
+    )
+    
+    if not updated_week:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Schedule week not found"
+        )
+    
+    return updated_week
+
+
+@router.get("/calendar/by_component", response_model=List[ComponentScheduleItem])
+async def get_audit_schedule_by_component(
+    date_from: date = Query(..., description="Начальная дата периода"),
+    date_to: date = Query(..., description="Конечная дата периода"),
+    component_type: Optional[str] = Query(None, description="Тип компонента"),
+    sap_id: Optional[str] = Query(None, description="SAP ID"),
+    enterprise_id: Optional[UUID] = Query(None, description="Фильтр по предприятию"),
+    db: AsyncSession = Depends(get_session)
+):
+    """
+    Получить график аудитов по компонентам (детали, узлы, системы).
+    
+    Args:
+        date_from: Начальная дата периода
+        date_to: Конечная дата периода
+        component_type: Тип компонента
+        sap_id: SAP ID
+        enterprise_id: Фильтр по предприятию
+        db: Сессия базы данных
+    
+    Returns:
+        Список компонентов с информацией об аудитах
+    """
+    components = await crud_calendar.get_audit_schedule_by_component(
+        db=db,
+        date_from=date_from,
+        date_to=date_to,
+        component_type=component_type,
+        sap_id=sap_id,
+        enterprise_id=enterprise_id
+    )
+    
+    return [ComponentScheduleItem(**comp) for comp in components]
+
+
+@router.get("/{audit_id}/reschedule_history", response_model=List[RescheduleHistoryItem])
+async def get_reschedule_history(
+    audit_id: UUID,
+    db: AsyncSession = Depends(get_session)
+):
+    """
+    Получить историю всех переносов аудита.
+    
+    Args:
+        audit_id: UUID аудита
+        db: Сессия базы данных
+    
+    Returns:
+        Список переносов с датами, причинами и исполнителями
+    
+    Raises:
+        HTTPException: Если аудит не найден
+    """
+    history_list = await crud_audit.get_reschedule_history(db, audit_id)
+    
+    if not history_list:
+        from app.crud import audit as crud_audit_get
+        audit = await crud_audit_get.get_audit(db, audit_id)
+        if not audit:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Audit not found"
+            )
+        return []
+    
+    result = []
+    for hist in history_list:
+        from app.schemas.audit import SimpleUser
+        result.append(RescheduleHistoryItem(
+            rescheduled_date=hist['rescheduled_date'],
+            postponed_reason=hist['postponed_reason'],
+            rescheduled_by=SimpleUser(
+                id=hist['rescheduled_by'].id,
+                first_name_ru=hist['rescheduled_by'].first_name_ru,
+                last_name_ru=hist['rescheduled_by'].last_name_ru,
+                patronymic_ru=hist['rescheduled_by'].patronymic_ru
+            ),
+            rescheduled_at=hist['rescheduled_at']
+        ))
+    
+    return result
 

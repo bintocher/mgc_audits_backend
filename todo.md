@@ -135,20 +135,20 @@
 106. [x] Создать API роуты для audits
 107. [x] Создать API роуты для audit_components
 108. [x] Реализовать фильтрацию аудитов по категориям
-109. Реализовать эндпоинт GET /api/v1/audits/calendar/schedule
-110. Реализовать логику автоматического заполнения ячеек графика
-111. Реализовать эндпоинт PATCH /api/v1/audits/{audit_id}/schedule/{week_number}/{year}
-112. Реализовать эндпоинт GET /api/v1/audits/calendar/by_component
-113. Реализовать эндпоинт POST /api/v1/audits/{id}/reschedule
-114. Реализовать эндпоинт GET /api/v1/audits/{id}/reschedule_history
-115. Реализовать логику переносов аудитов
-116. Реализовать вычисление color для ячеек графика
+109. [x] Реализовать эндпоинт GET /api/v1/audits/calendar/schedule
+110. [x] Реализовать логику автоматического заполнения ячеек графика
+111. [x] Реализовать эндпоинт PATCH /api/v1/audits/{audit_id}/schedule/{week_number}/{year}
+112. [x] Реализовать эндпоинт GET /api/v1/audits/calendar/by_component
+113. [x] Реализовать эндпоинт POST /api/v1/audits/{id}/reschedule
+114. [x] Реализовать эндпоинт GET /api/v1/audits/{id}/reschedule_history
+115. [x] Реализовать логику переносов аудитов
+116. [x] Реализовать вычисление color для ячеек графика
 
 ## Несоответствия (Findings)
 
-117. Создать модель Finding в models/finding.py
-118. Создать модель FindingDelegation в models/finding_delegation.py
-119. Создать модель FindingComment в models/finding_comment.py
+117. [x] Создать модель Finding в models/finding.py
+118. [x] Создать модель FindingDelegation в models/finding_delegation.py
+119. [x] Создать модель FindingComment в models/finding_comment.py
 120. Создать схему для Finding
 121. Создать схему для FindingDelegation
 122. Создать схему для FindingComment
