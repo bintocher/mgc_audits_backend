@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.audit_plan import AuditPlan
 from app.models.audit_plan_item import AuditPlanItem
 from app.schemas.audit_plan import AuditPlanCreate, AuditPlanUpdate
+from app.crud import auditor_qualification as crud_qualification
 
 
 async def create_audit_plan(db: AsyncSession, audit_plan: AuditPlanCreate) -> AuditPlan:
@@ -143,6 +144,16 @@ async def reject_audit_plan(
 
 
 async def create_audit_plan_item(db: AsyncSession, audit_plan_item: dict) -> AuditPlanItem:
+    planned_auditor_id = audit_plan_item.get('planned_auditor_id')
+    norm_id = audit_plan_item.get('norm_id')
+    
+    if planned_auditor_id and norm_id:
+        has_qualification = await crud_qualification.check_auditor_qualification(
+            db, planned_auditor_id, [norm_id]
+        )
+        if not has_qualification:
+            raise ValueError(f"Auditor {planned_auditor_id} does not have required qualification for standard {norm_id}")
+    
     db_audit_plan_item = AuditPlanItem(**audit_plan_item)
     db.add(db_audit_plan_item)
     await db.commit()
@@ -184,6 +195,20 @@ async def update_audit_plan_item(
     db_audit_plan_item = await get_audit_plan_item(db, audit_plan_item_id)
     if not db_audit_plan_item:
         return None
+    
+    planned_auditor_id = audit_plan_item_update.get('planned_auditor_id')
+    norm_id = audit_plan_item_update.get('norm_id')
+    
+    if planned_auditor_id or norm_id:
+        final_auditor_id = planned_auditor_id if planned_auditor_id else db_audit_plan_item.planned_auditor_id
+        final_norm_id = norm_id if norm_id else db_audit_plan_item.norm_id
+        
+        if final_auditor_id and final_norm_id:
+            has_qualification = await crud_qualification.check_auditor_qualification(
+                db, final_auditor_id, [final_norm_id]
+            )
+            if not has_qualification:
+                raise ValueError(f"Auditor {final_auditor_id} does not have required qualification for standard {final_norm_id}")
     
     for field, value in audit_plan_item_update.items():
         setattr(db_audit_plan_item, field, value)

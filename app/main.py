@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api import users, enterprises, roles, auth, auth_otp, telegram, workflow, dictionaries, audit_plans
+from app.api import users, enterprises, roles, auth, auth_otp, telegram, workflow, dictionaries, audit_plans, auditor_qualifications, audits, audit_components
 
 app = FastAPI(
     title="MGC Audits API",
@@ -19,6 +19,9 @@ app.include_router(enterprises.router, prefix="/api/v1")
 app.include_router(roles.router, prefix="/api/v1")
 app.include_router(dictionaries.router, prefix="/api/v1")
 app.include_router(audit_plans.router, prefix="/api/v1")
+app.include_router(auditor_qualifications.router, prefix="/api/v1")
+app.include_router(audits.router, prefix="/api/v1")
+app.include_router(audit_components.router, prefix="/api/v1")
 
 
 @app.get("/")

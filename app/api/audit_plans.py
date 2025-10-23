@@ -299,8 +299,17 @@ async def create_audit_plan_item(
     
     Returns:
         Созданный пункт плана аудитов
+    
+    Raises:
+        HTTPException: Если аудитор не имеет необходимой квалификации
     """
-    return await crud_audit_plan.create_audit_plan_item(db, audit_plan_item.model_dump())
+    try:
+        return await crud_audit_plan.create_audit_plan_item(db, audit_plan_item.model_dump())
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
 
 @router.get("/items/{audit_plan_item_id}", response_model=AuditPlanItemResponse)
@@ -348,19 +357,25 @@ async def update_audit_plan_item(
         Обновленная информация о пункте плана
     
     Raises:
-        HTTPException: Если пункт плана не найден
+        HTTPException: Если пункт плана не найден или аудитор не имеет необходимой квалификации
     """
-    updated_item = await crud_audit_plan.update_audit_plan_item(
-        db, 
-        audit_plan_item_id, 
-        audit_plan_item_update.model_dump(exclude_unset=True)
-    )
-    if not updated_item:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Audit plan item not found"
+    try:
+        updated_item = await crud_audit_plan.update_audit_plan_item(
+            db, 
+            audit_plan_item_id, 
+            audit_plan_item_update.model_dump(exclude_unset=True)
         )
-    return updated_item
+        if not updated_item:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Audit plan item not found"
+            )
+        return updated_item
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
 
 @router.delete("/items/{audit_plan_item_id}", status_code=status.HTTP_204_NO_CONTENT)

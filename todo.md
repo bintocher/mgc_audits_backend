@@ -110,31 +110,31 @@
 
 ## Квалификация аудиторов
 
-87. Создать модель AuditorQualification в models/auditor_qualification.py
-88. Создать модель QualificationStandard в models/qualification_standard.py
-89. Создать модель StandardChapter в models/standard_chapter.py
-90. Создать M2M связь между AuditorQualification и QualificationStandard
-91. Создать схемы для AuditorQualification
-92. Создать CRUD для AuditorQualification
-93. Создать API роуты для auditor_qualifications
-94. Реализовать проверку квалификации при назначении аудитора
-95. Создать фоновую задачу для автоматического изменения статуса expired
+87. [x] Создать модель AuditorQualification в models/auditor_qualification.py
+88. [x] Создать модель QualificationStandard в models/qualification_standard.py
+89. [x] Создать модель StandardChapter в models/standard_chapter.py
+90. [x] Создать M2M связь между AuditorQualification и QualificationStandard
+91. [x] Создать схемы для AuditorQualification
+92. [x] Создать CRUD для AuditorQualification
+93. [x] Создать API роуты для auditor_qualifications
+94. [x] Реализовать проверку квалификации при назначении аудитора
+95. [x] Создать фоновую задачу для автоматического изменения статуса expired
 
 ## Аудиты
 
-96. Создать модель Audit в models/audit.py
-97. Создать модель AuditComponent в models/audit_component.py
-98. Создать модель AuditScheduleWeek в models/audit_schedule_week.py
-99. Создать M2M таблицы для AuditLocations, AuditClients, AuditShifts
-100. Создать схемы для Audit
-101. Создать схемы для AuditComponent
-102. Создать схемы для AuditScheduleWeek
-103. Создать CRUD для Audit
-104. Создать CRUD для AuditComponent
-105. Создать CRUD для AuditScheduleWeek
-106. Создать API роуты для audits
-107. Создать API роуты для audit_components
-108. Реализовать фильтрацию аудитов по категориям
+96. [x] Создать модель Audit в models/audit.py
+97. [x] Создать модель AuditComponent в models/audit_component.py
+98. [x] Создать модель AuditScheduleWeek в models/audit_schedule_week.py
+99. [x] Создать M2M таблицы для AuditLocations, AuditClients, AuditShifts
+100. [x] Создать схемы для Audit
+101. [x] Создать схемы для AuditComponent
+102. [x] Создать схемы для AuditScheduleWeek
+103. [x] Создать CRUD для Audit
+104. [x] Создать CRUD для AuditComponent
+105. [x] Создать CRUD для AuditScheduleWeek
+106. [x] Создать API роуты для audits
+107. [x] Создать API роуты для audit_components
+108. [x] Реализовать фильтрацию аудитов по категориям
 109. Реализовать эндпоинт GET /api/v1/audits/calendar/schedule
 110. Реализовать логику автоматического заполнения ячеек графика
 111. Реализовать эндпоинт PATCH /api/v1/audits/{audit_id}/schedule/{week_number}/{year}
@@ -288,5 +288,3 @@
 226. Проверить работу уведомлений
 227. Проверить работу отчетов
 228. Подготовить к деплою на PROD
-229. Развернуть на PROD сервере
-230. Провести финальное тестирование на PROD

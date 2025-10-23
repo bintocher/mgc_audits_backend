@@ -11,6 +11,11 @@ from app.models.status_transition import StatusTransition
 from app.models.dictionary import DictionaryType, Dictionary
 from app.models.audit_plan import AuditPlan
 from app.models.audit_plan_item import AuditPlanItem
+from app.models.qualification_standard import QualificationStandard, StandardChapter
+from app.models.auditor_qualification import AuditorQualification
+from app.models.audit import Audit
+from app.models.audit_component import AuditComponent
+from app.models.audit_schedule_week import AuditScheduleWeek
 
 __all__ = [
     "Enterprise",
@@ -28,5 +33,11 @@ __all__ = [
     "Dictionary",
     "AuditPlan",
     "AuditPlanItem",
+    "QualificationStandard",
+    "StandardChapter",
+    "AuditorQualification",
+    "Audit",
+    "AuditComponent",
+    "AuditScheduleWeek",
 ]
 

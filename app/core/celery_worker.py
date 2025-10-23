@@ -15,6 +15,12 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
     beat_schedule_filename="temp/celerybeat-schedule",
+    beat_schedule={
+        "check-expired-qualifications": {
+            "task": "app.services.tasks.check_expired_qualifications",
+            "schedule": 86400.0,
+        },
+    },
 )
 
 if __name__ == "__main__":

@@ -14,4 +14,5 @@ class Location(AbstractBaseModel):
 
     division = relationship("Division", back_populates="locations")
     users = relationship("User", back_populates="location")
+    audits = relationship("Audit", secondary="audit_locations", back_populates="locations")
 

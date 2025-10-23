@@ -42,4 +42,5 @@ class User(AbstractBaseModel):
 
     location = relationship("Location", back_populates="users")
     user_roles = relationship("UserRole", back_populates="user", cascade="all, delete-orphan")
+    auditor_qualifications = relationship("AuditorQualification", back_populates="user", cascade="all, delete-orphan")
 
