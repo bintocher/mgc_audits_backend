@@ -2,6 +2,8 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from cryptography.fernet import Fernet
+import base64
 from app.core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -57,4 +59,22 @@ def generate_password() -> str:
     number = secrets.randbelow(100)
     
     return f"{word1.capitalize()}-{word2.capitalize()}-{number}"
+
+
+def get_encryption_key() -> bytes:
+    key = settings.SETTINGS_ENCRYPTION_KEY.encode()
+    key_b64 = base64.urlsafe_b64encode(key.ljust(32)[:32])
+    return key_b64
+
+
+def encrypt_value(value: str) -> str:
+    f = Fernet(get_encryption_key())
+    encrypted_value = f.encrypt(value.encode())
+    return encrypted_value.decode()
+
+
+def decrypt_value(encrypted_value: str) -> str:
+    f = Fernet(get_encryption_key())
+    decrypted_value = f.decrypt(encrypted_value.encode())
+    return decrypted_value.decode()
 

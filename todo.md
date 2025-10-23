@@ -211,24 +211,24 @@
 
 ## Настройки системы
 
-170. Создать модель SystemSetting в models/system_setting.py
-171. Создать схемы для SystemSetting
-172. Создать CRUD для SystemSetting
-173. Создать API роуты для settings
-174. Реализовать шифрование значений для критичных настроек
-175. Создать сервис для работы с S3 в services/s3.py
-176. Создать модель S3Storage в models/s3_storage.py
-177. Создать модель EmailAccount в models/email_account.py
-178. Создать модель LdapConnection в models/ldap_connection.py
-179. Создать CRUD для S3Storage
-180. Создать CRUD для EmailAccount
-181. Создать CRUD для LdapConnection
-182. Создать API роуты для integrations/s3_storages
-183. Создать API роуты для integrations/email_accounts
-184. Создать API роуты для integrations/ldap_connections
-185. Реализовать эндпоинт POST /api/v1/integrations/s3_storages/{id}/test
-186. Реализовать эндпоинт POST /api/v1/integrations/email_accounts/{id}/test
-187. Реализовать эндпоинт POST /api/v1/integrations/ldap_connections/{id}/test
+170. [x] Создать модель SystemSetting в models/system_setting.py
+171. [x] Создать схемы для SystemSetting
+172. [x] Создать CRUD для SystemSetting
+173. [x] Создать API роуты для settings
+174. [x] Реализовать шифрование значений для критичных настроек
+175. [x] Создать сервис для работы с S3 в services/s3.py
+176. [x] Создать модель S3Storage в models/s3_storage.py
+177. [x] Создать модель EmailAccount в models/email_account.py
+178. [x] Создать модель LdapConnection в models/ldap_connection.py
+179. [x] Создать CRUD для S3Storage
+180. [x] Создать CRUD для EmailAccount
+181. [x] Создать CRUD для LdapConnection
+182. [x] Создать API роуты для integrations/s3_storages
+183. [x] Создать API роуты для integrations/email_accounts
+184. [x] Создать API роуты для integrations/ldap_connections
+185. [x] Реализовать эндпоинт POST /api/v1/integrations/s3_storages/{id}/test
+186. [x] Реализовать эндпоинт POST /api/v1/integrations/email_accounts/{id}/test
+187. [x] Реализовать эндпоинт POST /api/v1/integrations/ldap_connections/{id}/test
 
 ## API токены
 

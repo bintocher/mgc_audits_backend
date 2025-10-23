@@ -31,6 +31,33 @@ from app.schemas.audit_schedule_week import (
     AuditScheduleWeekUpdate,
     AuditScheduleWeekResponse,
 )
+from app.schemas.system_setting import (
+    SystemSettingBase,
+    SystemSettingCreate,
+    SystemSettingUpdate,
+    SystemSettingResponse,
+)
+from app.schemas.s3_storage import (
+    S3StorageBase,
+    S3StorageCreate,
+    S3StorageUpdate,
+    S3StorageResponse,
+    S3StorageTestResponse,
+)
+from app.schemas.email_account import (
+    EmailAccountBase,
+    EmailAccountCreate,
+    EmailAccountUpdate,
+    EmailAccountResponse,
+    EmailAccountTestResponse,
+)
+from app.schemas.ldap_connection import (
+    LdapConnectionBase,
+    LdapConnectionCreate,
+    LdapConnectionUpdate,
+    LdapConnectionResponse,
+    LdapConnectionTestResponse,
+)
 
 __all__ = [
     "QualificationStandardBase",
@@ -58,5 +85,24 @@ __all__ = [
     "AuditScheduleWeekCreate",
     "AuditScheduleWeekUpdate",
     "AuditScheduleWeekResponse",
+    "SystemSettingBase",
+    "SystemSettingCreate",
+    "SystemSettingUpdate",
+    "SystemSettingResponse",
+    "S3StorageBase",
+    "S3StorageCreate",
+    "S3StorageUpdate",
+    "S3StorageResponse",
+    "S3StorageTestResponse",
+    "EmailAccountBase",
+    "EmailAccountCreate",
+    "EmailAccountUpdate",
+    "EmailAccountResponse",
+    "EmailAccountTestResponse",
+    "LdapConnectionBase",
+    "LdapConnectionCreate",
+    "LdapConnectionUpdate",
+    "LdapConnectionResponse",
+    "LdapConnectionTestResponse",
 ]
 

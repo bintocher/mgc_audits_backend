@@ -21,6 +21,10 @@ from app.models.finding_delegation import FindingDelegation
 from app.models.finding_comment import FindingComment
 from app.models.attachment import Attachment
 from app.models.change_history import ChangeHistory
+from app.models.system_setting import SystemSetting
+from app.models.s3_storage import S3Storage
+from app.models.email_account import EmailAccount
+from app.models.ldap_connection import LdapConnection
 
 __all__ = [
     "Enterprise",
@@ -49,5 +53,9 @@ __all__ = [
     "FindingComment",
     "Attachment",
     "ChangeHistory",
+    "SystemSetting",
+    "S3Storage",
+    "EmailAccount",
+    "LdapConnection",
 ]
 
