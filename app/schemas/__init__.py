@@ -58,6 +58,18 @@ from app.schemas.ldap_connection import (
     LdapConnectionResponse,
     LdapConnectionTestResponse,
 )
+from app.schemas.notification import (
+    NotificationBase,
+    NotificationCreate,
+    NotificationUpdate,
+    NotificationResponse,
+    NotificationQueueBase,
+    NotificationQueueCreate,
+    NotificationQueueUpdate,
+    NotificationQueueResponse,
+    NotificationStatsResponse,
+    NotificationQueueStatsResponse,
+)
 
 __all__ = [
     "QualificationStandardBase",
@@ -104,5 +116,15 @@ __all__ = [
     "LdapConnectionUpdate",
     "LdapConnectionResponse",
     "LdapConnectionTestResponse",
+    "NotificationBase",
+    "NotificationCreate",
+    "NotificationUpdate",
+    "NotificationResponse",
+    "NotificationQueueBase",
+    "NotificationQueueCreate",
+    "NotificationQueueUpdate",
+    "NotificationQueueResponse",
+    "NotificationStatsResponse",
+    "NotificationQueueStatsResponse",
 ]
 

@@ -25,6 +25,8 @@ from app.models.system_setting import SystemSetting
 from app.models.s3_storage import S3Storage
 from app.models.email_account import EmailAccount
 from app.models.ldap_connection import LdapConnection
+from app.models.notification import Notification
+from app.models.notification_queue import NotificationQueue
 
 __all__ = [
     "Enterprise",
@@ -57,5 +59,7 @@ __all__ = [
     "S3Storage",
     "EmailAccount",
     "LdapConnection",
+    "Notification",
+    "NotificationQueue",
 ]
 

@@ -131,3 +131,80 @@ async def update_token_last_used(
     token.last_used_at = datetime.now(timezone.utc)
     await db.commit()
 
+
+async def get_tokens(
+    db: AsyncSession,
+    skip: int = 0,
+    limit: int = 100,
+    user_id: Optional[UUID] = None,
+    is_active: Optional[bool] = None,
+    issued_for: Optional[str] = None
+) -> List[APIToken]:
+    """
+    Получить список токенов с фильтрацией.
+    """
+    stmt = select(APIToken)
+    
+    if user_id is not None:
+        stmt = stmt.where(APIToken.user_id == user_id)
+    
+    if is_active is not None:
+        stmt = stmt.where(APIToken.is_active == is_active)
+    
+    if issued_for is not None:
+        stmt = stmt.where(APIToken.issued_for == issued_for)
+    
+    stmt = stmt.offset(skip).limit(limit)
+    result = await db.execute(stmt)
+    return list(result.scalars().all())
+
+
+async def get_token(
+    db: AsyncSession,
+    token_id: UUID
+) -> Optional[APIToken]:
+    """
+    Получить токен по ID.
+    """
+    result = await db.execute(
+        select(APIToken).where(APIToken.id == token_id)
+    )
+    return result.scalar_one_or_none()
+
+
+async def update_token(
+    db: AsyncSession,
+    token_id: UUID,
+    token_update: dict
+) -> Optional[APIToken]:
+    """
+    Обновить токен.
+    """
+    token = await get_token(db=db, token_id=token_id)
+    if not token:
+        return None
+    
+    for field, value in token_update.items():
+        if value is not None:
+            setattr(token, field, value)
+    
+    await db.commit()
+    await db.refresh(token)
+    return token
+
+
+async def delete_token(
+    db: AsyncSession,
+    token_id: UUID
+) -> bool:
+    """
+    Отозвать токен (мягкое удаление).
+    """
+    token = await get_token(db=db, token_id=token_id)
+    if not token:
+        return False
+    
+    token.soft_delete()
+    await db.commit()
+    return True
+
