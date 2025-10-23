@@ -25,14 +25,6 @@ dependencies = [
     "cryptography",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest",
-    "pytest-asyncio",
-    "black",
-    "ruff",
-    "mypy",
-]
 
 [build-system]
 requires = ["hatchling"]

@@ -1,6 +1,0 @@
-pytest
-pytest-asyncio
-black
-ruff
-mypy
-

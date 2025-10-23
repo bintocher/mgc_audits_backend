@@ -19,17 +19,6 @@ class Settings(BaseSettings):
 
     SETTINGS_ENCRYPTION_KEY: str
 
-    DEBUG: bool = False
-    ENVIRONMENT: str = "production"
-
-    @property
-    def is_development(self) -> bool:
-        return self.ENVIRONMENT == "development"
-
-    @property
-    def is_production(self) -> bool:
-        return self.ENVIRONMENT == "production"
-
 
 settings = Settings()
 

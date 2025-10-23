@@ -46,8 +46,6 @@ REDIS_URL=redis://localhost:6379/0
 SECRET_KEY=your-secret-key-here
 SETTINGS_ENCRYPTION_KEY=your-encryption-key-here
 
-DEBUG=True
-ENVIRONMENT=development
 ```
 
 **Важно:** Настройки интеграций (SMTP, LDAP, S3, Telegram) управляются через таблицы в базе данных `S3Storage`, `EmailAccount`, `LdapConnection` и не должны храниться в `.env`.
@@ -75,11 +73,8 @@ make down
 make build
 make up
 
-# Установить зависимости для разработки
-make install-dev
-
-# Инициализировать проект для разработки
-make init-dev
+# Инициализировать проект
+make init
 
 # Создать миграцию
 make migrate msg="описание миграции"
@@ -106,21 +101,25 @@ make shell
 backend/
 ├── app/
 │   ├── api/          # API роутеры
-│   ├── core/         # Конфигурация, безопасность
+│   ├── core/         # Конфигурация, безопасность, БД, Celery
 │   ├── crud/         # CRUD операции
 │   ├── models/       # SQLAlchemy модели
 │   ├── schemas/      # Pydantic схемы
-│   └── services/    # Бизнес-логика
+│   └── services/     # Бизнес-логика и задачи Celery
 ├── alembic/         # Миграции базы данных
-├── main.py          # Точка входа
-├── database.py      # Подключение к БД
-└── requirements.txt # Зависимости
+├── scripts/         # Скрипты инициализации
+├── requirements.txt # Зависимости
+├── Dockerfile       # Docker образ
+├── docker-compose.yml # Docker Compose конфигурация
+└── Makefile         # Команды управления
 ```
 
 ## API Документация
 
 После запуска приложения доступна документация Swagger UI:
 - http://localhost:8000/docs
+
+Точка входа: `app/main.py`
 
 ## Лицензия
 
