@@ -88,25 +88,25 @@
 68. [x] Создать модели для конкретных справочников (Process, Norm, Product, Project, Client, Shift, RiskLevel, AuditCategory)
 69. [x] Создать схемы для Dictionary
 70. [x] Создать CRUD для Dictionary
-71. Создать API роуты для dictionaries
-72. Создать API роуты для dictionary_types
-73. Реализовать фильтрацию справочников по enterprise_id
+71. [x] Создать API роуты для dictionaries
+72. [x] Создать API роуты для dictionary_types
+73. [x] Реализовать фильтрацию справочников по enterprise_id
 
 ## Планирование аудитов
 
-74. Создать модель AuditPlan в models/audit_plan.py
-75. Создать модель AuditPlanItem в models/audit_plan_item.py
-76. Создать схемы для AuditPlan
-77. Создать схемы для AuditPlanItem
-78. Создать CRUD для AuditPlan
-79. Создать CRUD для AuditPlanItem
-80. Создать API роуты для audit_plans
-81. Создать API роуты для audit_plan_items
-82. Реализовать логику согласования плана на уровне Дивизиона
-83. Реализовать логику согласования плана на уровне УК
-84. Создать эндпоинт POST /api/v1/audit_plans/{id}/approve_by_division
-85. Создать эндпоинт POST /api/v1/audit_plans/{id}/approve_by_uk
-86. Создать эндпоинт POST /api/v1/audit_plans/{id}/reject
+74. [x] Создать модель AuditPlan в models/audit_plan.py
+75. [x] Создать модель AuditPlanItem в models/audit_plan_item.py
+76. [x] Создать схемы для AuditPlan
+77. [x] Создать схемы для AuditPlanItem
+78. [x] Создать CRUD для AuditPlan
+79. [x] Создать CRUD для AuditPlanItem
+80. [x] Создать API роуты для audit_plans
+81. [x] Создать API роуты для audit_plan_items
+82. [x] Реализовать логику согласования плана на уровне Дивизиона
+83. [x] Реализовать логику согласования плана на уровне УК
+84. [x] Создать эндпоинт POST /api/v1/audit_plans/{id}/approve_by_division
+85. [x] Создать эндпоинт POST /api/v1/audit_plans/{id}/approve_by_uk
+86. [x] Создать эндпоинт POST /api/v1/audit_plans/{id}/reject
 
 ## Квалификация аудиторов
 

@@ -9,6 +9,8 @@ from app.models.api_token import APIToken
 from app.models.status import Status
 from app.models.status_transition import StatusTransition
 from app.models.dictionary import DictionaryType, Dictionary
+from app.models.audit_plan import AuditPlan
+from app.models.audit_plan_item import AuditPlanItem
 
 __all__ = [
     "Enterprise",
@@ -24,5 +26,7 @@ __all__ = [
     "StatusTransition",
     "DictionaryType",
     "Dictionary",
+    "AuditPlan",
+    "AuditPlanItem",
 ]
 
