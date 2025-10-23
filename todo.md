@@ -149,36 +149,36 @@
 117. [x] Создать модель Finding в models/finding.py
 118. [x] Создать модель FindingDelegation в models/finding_delegation.py
 119. [x] Создать модель FindingComment в models/finding_comment.py
-120. Создать схему для Finding
-121. Создать схему для FindingDelegation
-122. Создать схему для FindingComment
-123. Создать CRUD для Finding
-124. Создать CRUD для FindingDelegation
-125. Создать CRUD для FindingComment
-126. Создать API роуты для findings
-127. Создать API роуты для finding_delegations
-128. Создать API роуты для finding_comments
-129. Реализовать валидацию полей для CAR1
-130. Реализовать валидацию полей для CAR2
-131. Реализовать валидацию полей для OFI
-132. Реализовать логику делегирования responsibility
-133. Реализовать автоинкремент finding_number
+120. [x] Создать схему для Finding
+121. [x] Создать схему для FindingDelegation
+122. [x] Создать схему для FindingComment
+123. [x] Создать CRUD для Finding
+124. [x] Создать CRUD для FindingDelegation
+125. [x] Создать CRUD для FindingComment
+126. [x] Создать API роуты для findings
+127. [x] Создать API роуты для finding_delegations
+128. [x] Создать API роуты для finding_comments
+129. [x] Реализовать валидацию полей для CAR1
+130. [x] Реализовать валидацию полей для CAR2
+131. [x] Реализовать валидацию полей для OFI
+132. [x] Реализовать логику делегирования responsibility
+133. [x] Реализовать автоинкремент finding_number
 
 ## Вложения
 
-134. Создать модель Attachment в models/attachment.py
-135. Создать схемы для Attachment
-136. Создать CRUD для Attachment
-137. Создать API роуты для attachments
+134. [x] Создать модель Attachment в models/attachment.py
+135. [x] Создать схемы для Attachment
+136. [x] Создать CRUD для Attachment
+137. [x] Создать API роуты для attachments
 138. Реализовать загрузку файлов в Yandex Object Storage
 139. Реализовать pre-signed URLs для доступа к файлам
-140. Реализовать полиформическую связь Attachment с сущностями
+140. [x] Реализовать полиформическую связь Attachment с сущностями
 
 ## История изменений
 
-141. Создать модель ChangeHistory в models/change_history.py
-142. Создать схемы для ChangeHistory
-143. Создать CRUD для ChangeHistory
+141. [x] Создать модель ChangeHistory в models/change_history.py
+142. [x] Создать схемы для ChangeHistory
+143. [x] Создать CRUD для ChangeHistory
 144. Создать API роуты для change_history
 145. Реализовать автоматическое логирование изменений в Audit
 146. Реализовать автоматическое логирование изменений в Finding

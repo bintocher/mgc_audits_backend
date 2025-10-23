@@ -19,6 +19,8 @@ from app.models.audit_schedule_week import AuditScheduleWeek
 from app.models.finding import Finding
 from app.models.finding_delegation import FindingDelegation
 from app.models.finding_comment import FindingComment
+from app.models.attachment import Attachment
+from app.models.change_history import ChangeHistory
 
 __all__ = [
     "Enterprise",
@@ -45,5 +47,7 @@ __all__ = [
     "Finding",
     "FindingDelegation",
     "FindingComment",
+    "Attachment",
+    "ChangeHistory",
 ]
 
