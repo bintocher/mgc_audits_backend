@@ -7,7 +7,8 @@ from app.core.database import get_db
 from app.models.user import User
 from app.core.security import create_access_token, create_refresh_token
 from app.services.otp import otp_service
-from app.services.email import email_service
+from app.services.email import send_otp
+from app.crud.email_account import get_default_email_account
 from app.schemas.auth import OTPSendRequest, OTPVerifyRequest, LoginResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -40,8 +41,19 @@ async def generate_otp(
     
     otp_code = await otp_service.generate_otp(request.email)
     
+    email_account = await get_default_email_account(db)
+    if not email_account:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="No email account configured"
+        )
+    
     try:
-        await email_service.send_otp(request.email, otp_code)
+        await send_otp(
+            account=email_account,
+            email=request.email,
+            otp_code=otp_code
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

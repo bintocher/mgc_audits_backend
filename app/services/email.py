@@ -1,36 +1,69 @@
-from typing import List, Optional
+from typing import Optional
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
-from app.core.config import settings
+from app.models.email_account import EmailAccount
+from app.crud.email_account import get_email_credentials
 
 
-class EmailService:
-    def __init__(self):
-        self.config = ConnectionConfig(
-            MAIL_USERNAME=settings.MAIL_USERNAME,
-            MAIL_PASSWORD=settings.MAIL_PASSWORD,
-            MAIL_FROM=settings.MAIL_FROM,
-            MAIL_PORT=settings.MAIL_PORT,
-            MAIL_SERVER=settings.MAIL_SERVER,
-            MAIL_FROM_NAME=settings.MAIL_FROM_NAME,
-            MAIL_STARTTLS=settings.MAIL_STARTTLS,
-            MAIL_SSL_TLS=settings.MAIL_SSL_TLS,
-            USE_CREDENTIALS=True,
-            VALIDATE_CERTS=True
-        )
-        self.fast_mail = FastMail(self.config)
+async def send_email(
+    account: EmailAccount,
+    recipients: list[str],
+    subject: str,
+    body: str
+):
+    """
+    Отправка email через указанный аккаунт.
     
-    async def send_registration_invite(
-        self,
-        email: str,
-        token: str,
-        registration_url: str
-    ):
-        """
-        Отправка email с приглашением на регистрацию.
-        """
-        subject = "Приглашение на регистрацию"
-        
-        body = f"""
+    Args:
+        account: Email аккаунт для отправки
+        recipients: Список получателей
+        subject: Тема письма
+        body: Текст письма
+    """
+    credentials = get_email_credentials(account)
+    
+    config = ConnectionConfig(
+        MAIL_USERNAME=account.smtp_user,
+        MAIL_PASSWORD=credentials['smtp_password'],
+        MAIL_FROM=account.from_email,
+        MAIL_PORT=account.smtp_port,
+        MAIL_SERVER=account.smtp_host,
+        MAIL_FROM_NAME=account.from_name,
+        MAIL_STARTTLS=account.use_tls,
+        MAIL_SSL_TLS=False,
+        USE_CREDENTIALS=True,
+        VALIDATE_CERTS=True
+    )
+    
+    fast_mail = FastMail(config)
+    
+    message = MessageSchema(
+        subject=subject,
+        recipients=recipients,
+        body=body,
+        subtype="plain"
+    )
+    
+    await fast_mail.send_message(message)
+
+
+async def send_registration_invite(
+    account: EmailAccount,
+    email: str,
+    token: str,
+    registration_url: str
+):
+    """
+    Отправка email с приглашением на регистрацию.
+    
+    Args:
+        account: Email аккаунт для отправки
+        email: Email получателя
+        token: Токен приглашения
+        registration_url: URL для регистрации
+    """
+    subject = "Приглашение на регистрацию"
+    
+    body = f"""
 Здравствуйте!
 
 Вы получили приглашение на регистрацию в системе аудитов.
@@ -45,27 +78,26 @@ class EmailService:
 С уважением,
 Команда MGC Audits
 """
-        
-        message = MessageSchema(
-            subject=subject,
-            recipients=[email],
-            body=body,
-            subtype="plain"
-        )
-        
-        await self.fast_mail.send_message(message)
     
-    async def send_otp(
-        self,
-        email: str,
-        otp_code: str
-    ):
-        """
-        Отправка OTP кода на email.
-        """
-        subject = "Код подтверждения MGC Audits"
-        
-        body = f"""
+    await send_email(account, [email], subject, body)
+
+
+async def send_otp(
+    account: EmailAccount,
+    email: str,
+    otp_code: str
+):
+    """
+    Отправка OTP кода на email.
+    
+    Args:
+        account: Email аккаунт для отправки
+        email: Email получателя
+        otp_code: OTP код
+    """
+    subject = "Код подтверждения MGC Audits"
+    
+    body = f"""
 Здравствуйте!
 
 Ваш код подтверждения для входа в систему MGC Audits:
@@ -79,16 +111,6 @@ class EmailService:
 С уважением,
 Команда MGC Audits
 """
-        
-        message = MessageSchema(
-            subject=subject,
-            recipients=[email],
-            body=body,
-            subtype="plain"
-        )
-        
-        await self.fast_mail.send_message(message)
-
-
-email_service = EmailService()
+    
+    await send_email(account, [email], subject, body)
 

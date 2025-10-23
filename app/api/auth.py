@@ -26,8 +26,10 @@ from app.schemas.auth import (
     TokenPayload
 )
 from app.crud.registration_invite import create_invite, get_invite_by_email
-from app.services.email import email_service
-from app.services.ldap import ldap_service
+from app.crud.email_account import get_default_email_account
+from app.crud.ldap_connection import get_default_ldap_connection
+from app.services.email import send_registration_invite
+from app.services.ldap import authenticate_ldap_user
 from app.services.otp import otp_service
 from app.schemas.auth import OTPSendRequest, OTPVerifyRequest
 from pydantic import EmailStr
@@ -348,8 +350,16 @@ async def create_registration_invite(
     
     registration_url = f"{settings.FRONTEND_URL}/register"
     
+    email_account = await get_default_email_account(db)
+    if not email_account:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="No email account configured"
+        )
+    
     try:
-        await email_service.send_registration_invite(
+        await send_registration_invite(
+            account=email_account,
             email=email,
             token=invite.token,
             registration_url=registration_url
@@ -376,7 +386,18 @@ async def ldap_login(
     Вход в систему через LDAP.
     Возвращает access и refresh токены.
     """
-    ldap_user = await ldap_service.authenticate(login_data.email, login_data.password)
+    ldap_connection = await get_default_ldap_connection(db)
+    if not ldap_connection:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="No LDAP connection configured"
+        )
+    
+    ldap_user = await authenticate_ldap_user(
+        connection=ldap_connection,
+        username=login_data.email,
+        password=login_data.password
+    )
     
     if ldap_user is None:
         raise HTTPException(
