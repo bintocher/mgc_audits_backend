@@ -224,3 +224,69 @@ async def get_reschedule_history(
     
     return [history]
 
+
+async def collect_audit_export_data(
+    db: AsyncSession,
+    audit_id: UUID
+) -> dict:
+    """
+    Собрать все данные аудита для экспорта.
+    
+    Returns:
+        dict: Словарь с данными аудита, findings, attachments, history
+    """
+    db_audit = await get_audit(db, audit_id)
+    if not db_audit:
+        return {}
+    
+    audit_data = {
+        "id": str(db_audit.id),
+        "title": db_audit.title,
+        "audit_number": db_audit.audit_number,
+        "subject": db_audit.subject,
+        "enterprise_id": str(db_audit.enterprise_id),
+        "audit_category": db_audit.audit_category,
+        "audit_date_from": db_audit.audit_date_from.isoformat() if db_audit.audit_date_from else None,
+        "audit_date_to": db_audit.audit_date_to.isoformat() if db_audit.audit_date_to else None,
+        "year": db_audit.year,
+        "audit_result": db_audit.audit_result,
+        "estimated_hours": float(db_audit.estimated_hours) if db_audit.estimated_hours else None,
+        "actual_hours": float(db_audit.actual_hours) if db_audit.actual_hours else None,
+        "milestone_codes": db_audit.milestone_codes,
+        "result_comment": db_audit.result_comment,
+        "created_at": db_audit.created_at.isoformat() if db_audit.created_at else None,
+        "updated_at": db_audit.updated_at.isoformat() if db_audit.updated_at else None
+    }
+    
+    findings_data = []
+    if db_audit.findings:
+        for finding in db_audit.findings:
+            findings_data.append({
+                "finding_number": finding.finding_number,
+                "title": finding.title,
+                "description": finding.description,
+                "finding_type": finding.finding_type,
+                "deadline": finding.deadline.isoformat() if finding.deadline else None,
+                "closing_date": finding.closing_date.isoformat() if finding.closing_date else None,
+                "why_1": finding.why_1,
+                "why_2": finding.why_2,
+                "why_3": finding.why_3,
+                "why_4": finding.why_4,
+                "why_5": finding.why_5,
+                "immediate_action": finding.immediate_action,
+                "root_cause": finding.root_cause,
+                "long_term_action": finding.long_term_action,
+                "action_verification": finding.action_verification,
+                "preventive_measures": finding.preventive_measures
+            })
+    
+    attachments_data = []
+    history_data = []
+    
+    return {
+        "audit": audit_data,
+        "findings": findings_data,
+        "attachments": attachments_data,
+        "history": history_data
+    }
+

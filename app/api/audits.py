@@ -1,7 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 from datetime import date
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_session
 from app.core.dependencies import get_current_user
@@ -21,6 +21,7 @@ from app.schemas.audit import (
 )
 from app.schemas.audit_schedule_week import AuditScheduleWeekResponse
 from app.schemas.change_history import ChangeHistoryResponse
+from app.services.export import export_audit_to_zip
 
 
 router = APIRouter(prefix="/audits", tags=["audits"])
@@ -528,4 +529,41 @@ async def get_audit_history(
     )
     
     return history
+
+
+@router.post("/{audit_id}/export")
+async def export_audit(
+    audit_id: UUID,
+    db: AsyncSession = Depends(get_session)
+):
+    """
+    Экспортировать аудит со всеми связанными данными в ZIP архив.
+    
+    Returns:
+        ZIP архив с данными аудита
+    """
+    export_data = await crud_audit.collect_audit_export_data(db=db, audit_id=audit_id)
+    
+    if not export_data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Audit not found"
+        )
+    
+    zip_file = export_audit_to_zip(
+        audit_data=export_data["audit"],
+        findings_data=export_data["findings"],
+        attachments_data=export_data["attachments"],
+        history_data=export_data["history"]
+    )
+    
+    audit_number = export_data["audit"].get("audit_number", "unknown")
+    
+    return Response(
+        content=zip_file.read(),
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": f"attachment; filename=audit_{audit_number}_{date.today().isoformat()}.zip"
+        }
+    )
 
