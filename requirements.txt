@@ -16,3 +16,6 @@ aiosmtplib
 boto3
 openpyxl
 cryptography
+email-validator
+fastapi-mail
+jinja2

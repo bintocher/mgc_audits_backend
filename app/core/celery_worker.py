@@ -14,6 +14,7 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="UTC",
     enable_utc=True,
+    beat_schedule_filename="temp/celerybeat-schedule",
 )
 
 if __name__ == "__main__":

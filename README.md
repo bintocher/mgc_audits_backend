@@ -120,7 +120,3 @@ backend/
 - http://localhost:8000/docs
 
 Точка входа: `app/main.py`
-
-## Лицензия
-
-MIT

@@ -4,6 +4,10 @@ from app.models.location import Location
 from app.models.user import User
 from app.models.role import Role, Permission
 from app.models.user_role import UserRole
+from app.models.registration_invite import RegistrationInvite
+from app.models.api_token import APIToken
+from app.models.status import Status
+from app.models.status_transition import StatusTransition
 
 __all__ = [
     "Enterprise",
@@ -13,5 +17,9 @@ __all__ = [
     "Role",
     "Permission",
     "UserRole",
+    "RegistrationInvite",
+    "APIToken",
+    "Status",
+    "StatusTransition",
 ]
 

@@ -1,8 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 from sqlalchemy import Column, DateTime, func
-from sqlalchemy.ext.declarative import declared_attribute
-from database import Base
+from sqlalchemy.orm import declared_attr
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
+from app.core.database import Base
 
 
 class TimestampMixin:
@@ -14,7 +16,7 @@ class SoftDeleteMixin:
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
     def soft_delete(self) -> None:
-        self.deleted_at = datetime.utcnow()
+        self.deleted_at = datetime.now(timezone.utc)
 
     def restore(self) -> None:
         self.deleted_at = None
@@ -26,8 +28,10 @@ class SoftDeleteMixin:
 
 class AbstractBaseModel(Base, TimestampMixin, SoftDeleteMixin):
     __abstract__ = True
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
-    @declared_attribute
+    @declared_attr
     def __tablename__(cls) -> str:
         return cls.__name__.lower()
 

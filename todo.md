@@ -27,55 +27,56 @@
 20. [x] Создать модель User в models/user.py
 21. [x] Создать модели Role и Permission в models/role.py
 22. [x] Создать модель UserRole в models/user_role.py
-23. Создать схемы Pydantic для User в schemas/user.py
-24. Создать схемы Pydantic для Enterprise в schemas/enterprise.py
-25. Создать CRUD операции для User в crud/user.py
-26. Создать CRUD операции для Enterprise в crud/enterprise.py
-27. Создать CRUD операции для Role в crud/role.py
-28. Создать API роуты для User в api/users.py
-29. Создать API роуты для Enterprise в api/enterprises.py
-30. Создать API роуты для Role в api/roles.py
+23. [x] Создать схемы Pydantic для User в schemas/user.py
+24. [x] Создать схемы Pydantic для Enterprise в schemas/enterprise.py
+25. [x] Создать CRUD операции для User в crud/user.py
+26. [x] Создать CRUD операции для Enterprise в crud/enterprise.py
+27. [x] Создать CRUD операции для Role в crud/role.py
+28. [x] Создать API роуты для User в api/users.py
+29. [x] Создать API роуты для Enterprise в api/enterprises.py
+30. [x] Создать API роуты для Role в api/roles.py
+30a. [x] Добавить docstring ко всем API методам
 
 ## Авторизация и аутентификация
 
-31. Реализовать функцию генерации JWT токенов в core/security.py
-32. Реализовать функцию проверки пароля в core/security.py
-33. Создать эндпоинт POST /api/v1/auth/login
-34. Создать эндпоинт POST /api/v1/auth/refresh
-35. Создать эндпоинт POST /api/v1/auth/logout
-36. Создать эндпоинт POST /api/v1/auth/register
-37. Создать middleware для проверки JWT токенов
-38. Создать middleware для проверки RBAC прав
-39. Реализовать LDAP подключение в services/ldap.py
-40. Создать эндпоинт для LDAP авторизации
-41. Реализовать OTP генерацию в services/otp.py
-42. Создать эндпоинт POST /api/v1/auth/otp/generate
-43. Создать эндпоинт POST /api/v1/auth/otp/verify
-44. Реализовать механизм единой сессии
-45. Создать модель RegistrationInvite
-46. Создать CRUD для RegistrationInvite
-47. Создать эндпоинт для создания приглашений
-48. Реализовать отправку email с приглашением
+31. [x] Реализовать функцию генерации JWT токенов в core/security.py
+32. [x] Реализовать функцию проверки пароля в core/security.py
+33. [x] Создать эндпоинт POST /api/v1/auth/login
+34. [x] Создать эндпоинт POST /api/v1/auth/refresh
+35. [x] Создать эндпоинт POST /api/v1/auth/logout
+36. [x] Создать эндпоинт POST /api/v1/auth/register
+37. [x] Создать middleware для проверки JWT токенов
+38. [x] Создать middleware для проверки RBAC прав
+39. [x] Реализовать LDAP подключение в services/ldap.py
+40. [x] Создать эндпоинт для LDAP авторизации
+41. [x] Реализовать OTP генерацию в services/otp.py
+42. [x] Создать эндпоинт POST /api/v1/auth/otp/generate
+43. [x] Создать эндпоинт POST /api/v1/auth/otp/verify
+44. [x] Реализовать механизм единой сессии
+45. [x] Создать модель RegistrationInvite
+46. [x] Создать CRUD для RegistrationInvite
+47. [x] Создать эндпоинт для создания приглашений
+48. [x] Реализовать отправку email с приглашением
 
 ## Telegram интеграция
 
-49. Создать модель APIToken в models/api_token.py
-50. Создать CRUD для APIToken
-51. Создать эндпоинт POST /api/v1/auth/telegram/link
-52. Создать эндпоинт POST /api/v1/auth/telegram/unlink
-53. Реализовать Telegram бота в services/telegram.py
-54. Создать обработчик команд бота
+49. [x] Создать модель APIToken в models/api_token.py
+50. [x] Создать CRUD для APIToken
+51. [x] Создать эндпоинт POST /api/v1/auth/telegram/link
+52. [x] Создать эндпоинт POST /api/v1/auth/telegram/unlink
+53. [x] Реализовать Telegram бота в services/telegram.py
+54. [x] Создать обработчик команд бота
 
 ## Workflow и статусы
 
-55. Создать модель Status в models/status.py
-56. Создать модель StatusTransition в models/status_transition.py
-57. Создать схемы для Status
-58. Создать схемы для StatusTransition
-59. Создать CRUD для Status
-60. Создать CRUD для StatusTransition
-61. Создать API роуты для workflow/statuses
-62. Создать API роуты для workflow/transitions
+55. [x] Создать модель Status в models/status.py
+56. [x] Создать модель StatusTransition в models/status_transition.py
+57. [x] Создать схемы для Status
+58. [x] Создать схемы для StatusTransition
+59. [x] Создать CRUD для Status
+60. [x] Создать CRUD для StatusTransition
+61. [x] Создать API роуты для workflow/statuses
+62. [x] Создать API роуты для workflow/transitions
 63. Реализовать валидацию переходов статусов
 64. Реализовать проверку required_fields при смене статуса
 65. Реализовать проверку required_roles при смене статуса
